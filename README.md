@@ -28,7 +28,7 @@ Real environments contain both, which is why the lab builds one of each.
 
 I built a custom SAML 2.0 app integration in Okta, since Okta's older prebuilt test app was no longer available in the catalog. The Single sign-on URL (ACS URL) and Audience URI were pointed at a public SAML test service.
 
-![Okta SAML app configuration](docs/screenshots/Okta_SAML_app_config_SS.png)
+![Okta SAML app configuration]( docs/screenshots/Okta_SAML_app_config_SS.png)
 
 I created a test user natively in Okta and assigned it to the app. The assignment is the **authorization** step: a user can authenticate successfully and still be blocked from an app they were never assigned to. Okta and Entra keep separate user directories, so each needed its own test users.
 
