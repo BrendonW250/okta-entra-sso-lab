@@ -24,7 +24,7 @@ Both protocols answer the same question ("this identity provider vouches for thi
 
 Real environments contain both, which is why the lab builds one of each.
 
-## Part 1 — Okta SAML
+## Part 1: Okta SAML
 
 I built a custom SAML 2.0 app integration in Okta, since Okta's older prebuilt test app was no longer available in the catalog. The Single sign-on URL (ACS URL) and Audience URI were pointed at a public SAML test service.
 
@@ -48,7 +48,7 @@ What the assertion shows:
 
 **Note:** this is Okta's preview of the assertion, generated from an admin session. It does not show the digital signature, and it does not by itself demonstrate MFA. See Part 3.
 
-## Part 2 — Microsoft Entra ID OIDC
+## Part 2: Microsoft Entra ID OIDC
 
 I registered an application in Entra (single-tenant, web platform, redirect URI `https://oidcdebugger.com/debug`) and generated a client ID and client secret.
 
@@ -75,7 +75,7 @@ The debugger then shows the next step, which a real application's backend perfor
 
 The app's sign-in policy rule requires **any 2 factor types** before access is allowed. That count is the setting that turns password-only login into MFA. Additional constraints require user interaction with the possession factor, and re-authentication every 12 hours.
 
-![Okta App Sign-In Policy rule](docs/screenshots/Okta_App_SignIn_Policy_SS.png)
+![Okta App Sign-In Policy rule](docs/screenshots/Okta_App_SignIn_Policy_Any_Two_Factors_SS.png)
 
 Verification: signing in as a test user in a fresh private window, Okta interrupted the login and required a code from Okta Verify before granting access.
 
@@ -95,20 +95,18 @@ Verification: signing in as a test user, Entra required approval in Microsoft Au
 
 ## Challenges & What I Learned
 
-- **Microsoft 365 Developer Program sandbox denied.** The free sandbox declined my eligibility. Every Azure account includes a default Entra tenant, so an Azure free account gave me a working Entra environment.
-- **Okta's test SAML app was gone.** The catalog no longer offered a generic SAML test app, so I built a custom SAML app integration, which meant filling in the ACS URL and Audience URI myself.
-- **The public SAML test service was unreachable.** The final redirect to the test service failed with a connection-refused error. The identity provider side had already worked, so I verified what Okta issues using its assertion preview instead of a live service provider.
-- **Two identity systems, two user directories.** Users created in Entra don't exist in Okta. Test users had to be created in each.
-- **A wrong org URL looked like a credentials problem.** Sign-in kept failing with a generic "Unable to sign in" message. I spent time on passwords and account statuses before finding the real cause: I was using the wrong Okta org URL. Lesson: verify the basics first.
+- **Microsoft 365 Developer Program sandbox denied.** I initially tried to use the sandbox environment that comes with the Microsoft 365 Developer Program but it didn't seem that my account was eligible. Since Azure accounts include a default Entra tenant, I went that route to start working within the Entra environment.
+- **Okta's generic SAML test app no longer exists in the catalog.** The catalog no longer offered a generic SAML test app, so I built a custom SAML app integration, which meant filling in the ACS URL and Audience URI myself and configuring the actual trust relationship.
+- **The public SAML test service (samltest.id) had been retired.** The final redirect to the test service failed with a connection-refused error. Since Okta had already authenticated the user and issued the assertion before that redirect, I verified the identity provider side using Okta's built-in assertion preview.
 - **"Password expired" right after account creation is normal.** When an admin sets an initial password, Okta requires the user to choose a new one at first login.
-- **Conditional Access needs a paid license.** I used Security Defaults and documented the difference instead.
+- **Conditional Access required a paid Entra ID P1/P2 license.** Since curating conditional access required a different Entra membership, I used Microsoft's Security Defaults and documented the distinction between the two being that Secruity Defaults require every app the user is assigned to require MFA and the Conditional Access allows for MFA rules to be applied to the apps you specifically want them to apply to.
 
 ## Limitations & Next Steps
 
 - No live end-to-end SAML round trip with a working service provider. Next step: stand up a self-hosted test service provider.
 - The OIDC token exchange wasn't executed. Next step: complete it from a backend call and decode the ID token.
 - No Conditional Access policies (location, device). Next step: build them in a tenant with the required license.
-- Apps were assigned to individual users. Group-based assignment is the pattern that scales.
+
 
 ## Security Notes
 
@@ -136,4 +134,3 @@ okta-entra-sso-lab/
 
 ---
 
-Built by [YOUR_GITHUB_USERNAME] as part of a hands-on IAM engineering portfolio.
