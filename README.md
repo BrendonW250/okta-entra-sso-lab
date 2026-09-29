@@ -69,13 +69,13 @@ The debugger then shows the next step, which a real application's backend perfor
 
 **Scope of this test:** it verified the authorization-code leg of the flow (user authentication and code issuance). I did not execute the token exchange or inspect an ID token.
 
-## Part 3 — MFA in Both Platforms
+## Part 3: MFA in Both Platforms
 
 ### Okta: App Sign-In Policy
 
 The app's sign-in policy rule requires **any 2 factor types** before access is allowed. That count is the setting that turns password-only login into MFA. Additional constraints require user interaction with the possession factor, and re-authentication every 12 hours.
 
-![Okta App Sign-In Policy rule](docs/screenshots/Okta_App_SignIn_Policy_Any_Two_Factors_SS.png)
+![Okta App Sign-In Policy rule](docs/screenshots/Okta_App_Sign_In_Policy_Any_Two_Factors_SS.png)
 
 Verification: signing in as a test user in a fresh private window, Okta interrupted the login and required a code from Okta Verify before granting access.
 
@@ -93,7 +93,7 @@ Verification: signing in as a test user, Entra required approval in Microsoft Au
 
 **Security Defaults vs. Conditional Access:** Security Defaults is all-or-nothing (MFA for everyone). Conditional Access is the granular tool, with rules such as requiring MFA for one app, or blocking sign-ins from certain locations. Okta's App Sign-In Policy plays a similar role on the Okta side, with rules evaluated in priority order like an if/else chain.
 
-## Challenges & What I Learned
+## Challenges & Lessons Learned
 
 - **Microsoft 365 Developer Program sandbox denied.** I initially tried to use the sandbox environment that comes with the Microsoft 365 Developer Program but it didn't seem that my account was eligible. Since Azure accounts include a default Entra tenant, I went that route to start working within the Entra environment.
 - **Okta's generic SAML test app no longer exists in the catalog.** The catalog no longer offered a generic SAML test app, so I built a custom SAML app integration, which meant filling in the ACS URL and Audience URI myself and configuring the actual trust relationship.
@@ -104,7 +104,7 @@ Verification: signing in as a test user, Entra required approval in Microsoft Au
 ## Limitations & Next Steps
 
 - No live end-to-end SAML round trip with a working service provider. Next step: stand up a self-hosted test service provider.
-- The OIDC token exchange wasn't executed. Next step: complete it from a backend call and decode the ID token.
+- The OIDC flow was only verified through the authorization code and not the full token exchange. The OIDC debugger stops there by design as completing the exchange required the Client Secret which it doesn't ask for due to security reasons. Next step: perform that exchange manually (through a POST request) and decode the resulting ID token to verify the full round trip.
 - No Conditional Access policies (location, device). Next step: build them in a tenant with the required license.
 
 
